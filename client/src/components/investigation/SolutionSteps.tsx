@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckSquare, AlertTriangle, RotateCcw } from 'lucide-react';
+import { CheckSquare, AlertTriangle, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { SolutionStep } from '../../types';
 import { CopyButton } from '../ui/CopyButton';
 
@@ -31,21 +31,56 @@ export const SolutionSteps: React.FC<SolutionStepsProps> = ({ steps, isConclusiv
         {steps.map((step, idx) => (
           <div
             key={idx}
-            className="p-5 rounded-xl border border-slate-200 bg-white space-y-3.5 shadow-xs"
+            className={`p-5 rounded-xl border bg-white space-y-3.5 shadow-xs ${
+              step.is_security_sensitive ? 'border-amber-300 ring-1 ring-amber-200/50' : 'border-slate-200'
+            }`}
           >
             <div className="flex items-start gap-3">
               <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                 {step.step_number || idx + 1}
               </span>
               <div className="space-y-1">
-                <h4 className="text-base font-semibold text-slate-900">
-                  {step.title}
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-base font-semibold text-slate-900">
+                    {step.title}
+                  </h4>
+                  {step.is_security_sensitive && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                      Security-Sensitive
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   {step.instructions}
                 </p>
               </div>
             </div>
+
+            {/* Security Notice Banner */}
+            {step.is_security_sensitive && (
+              <div className="flex items-start gap-2.5 text-amber-900 bg-amber-50/80 p-3 rounded-lg border border-amber-200">
+                <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-semibold text-xs text-amber-950">Security Notice:</span>
+                  <p className="text-[11px] leading-relaxed text-amber-800">
+                    This step adjusts execution permissions or security controls. Proceed with care or use the safer alternative below.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Safer Alternative Recommendation */}
+            {step.safer_alternative && (
+              <div className="flex items-start gap-2.5 text-blue-900 bg-blue-50/70 p-3 rounded-lg border border-blue-200">
+                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-semibold text-xs text-blue-950">Safer Alternative (Recommended):</span>
+                  <p className="text-[11px] leading-relaxed text-blue-800">
+                    {step.safer_alternative}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Code Snippet Box */}
             {step.code_snippet && (

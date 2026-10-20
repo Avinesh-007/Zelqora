@@ -44,7 +44,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Zelqora-CSRF', 'x-zelqora-guest-token']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Zelqora-CSRF', 'x-zelqora-guest-token', 'x-guest-token']
 }));
 
 // Parsers

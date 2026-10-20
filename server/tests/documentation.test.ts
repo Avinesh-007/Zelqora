@@ -28,4 +28,14 @@ describe('DocumentationService', () => {
     expect(results.length).toBeGreaterThan(0);
     expect(results.some(r => r.url.includes('developer.mozilla.org') || r.url.includes('fastapi.tiangolo.com'))).toBe(true);
   });
+
+  it('strictly excludes unrelated topics from query results', () => {
+    // When searching for Docker exit code 137 OOMKilled:
+    const oomResults = DocumentationService.search('Docker container exit code 137 OOMKilled', 'Docker', 4);
+    // Should NOT include Docker Networking, Compose, or React Hydration
+    expect(oomResults.some(r => r.url.includes('/engine/network/'))).toBe(false);
+    expect(oomResults.some(r => r.url.includes('react.dev'))).toBe(false);
+    expect(oomResults.some(r => r.url.includes('sqlite.org'))).toBe(false);
+    expect(oomResults.every(r => r.url.includes('resource_constraints') || r.url.includes('process.html'))).toBe(true);
+  });
 });

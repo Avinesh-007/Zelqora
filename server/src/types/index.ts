@@ -40,7 +40,9 @@ export interface Hypothesis {
   id: string;
   title: string;
   explanation: string;
-  likelihood_score: number; // 0 - 100
+  likelihood_score?: number; // legacy backwards compatibility
+  likelihood: 'likely' | 'possible' | 'unlikely' | 'confirmed';
+  uncertainty_reason?: string;
   supporting_evidence: string[];
   refuting_evidence?: string[];
 }
@@ -49,6 +51,12 @@ export interface DiagnosticTest {
   id: string;
   title: string;
   command: string;
+  step_order?: number;
+  os_specific_commands?: {
+    windows?: string;
+    linux?: string;
+    macos?: string;
+  };
   is_safe: boolean;
   requires_elevation: boolean;
   explanation: string;
@@ -66,6 +74,8 @@ export interface SolutionStep {
   code_snippet?: string;
   language?: string;
   caution_notes?: string;
+  is_security_sensitive?: boolean;
+  safer_alternative?: string;
   rollback_instructions?: string;
 }
 
@@ -87,6 +97,12 @@ export interface DiagnosticAssessment {
   recommended_solution?: SolutionStep[];
   documentation_references: DocumentationRef[];
   is_conclusive: boolean;
+  uncertainty_summary?: string;
+  evidence_evaluation?: {
+    positive_match: boolean;
+    evaluated_output: string;
+    notes: string;
+  };
   safety_warnings: string[];
 }
 

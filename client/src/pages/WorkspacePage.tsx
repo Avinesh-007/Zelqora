@@ -354,6 +354,34 @@ export const WorkspacePage: React.FC = () => {
                     </p>
                   </div>
 
+                  {/* Evidence Evaluation Note if user submitted evidence in this turn */}
+                  {latestTurn.assessment.evidence_evaluation && (
+                    <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+                      latestTurn.assessment.evidence_evaluation.positive_match
+                        ? 'border-emerald-300 bg-emerald-50/70 text-emerald-950'
+                        : 'border-blue-200 bg-blue-50/50 text-slate-800'
+                    }`}>
+                      <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${
+                        latestTurn.assessment.evidence_evaluation.positive_match ? 'text-emerald-600' : 'text-blue-600'
+                      }`} />
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-slate-900">Evidence Evaluation (Step {latestTurn.turn_index}):</span>
+                        <p className="leading-relaxed">{latestTurn.assessment.evidence_evaluation.notes}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Uncertainty Summary */}
+                  {latestTurn.assessment.uncertainty_summary && (
+                    <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 text-xs text-amber-950 flex items-start gap-2.5">
+                      <HelpCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-amber-950">Diagnostic Uncertainty:</span>
+                        <p className="text-amber-900 leading-relaxed">{latestTurn.assessment.uncertainty_summary}</p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Clarifying Questions */}
                   {latestTurn.assessment.clarifying_questions && latestTurn.assessment.clarifying_questions.length > 0 && (
                     <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 text-amber-950 space-y-2">

@@ -24,7 +24,7 @@ export async function authMiddleware(req: AuthenticatedRequest, res: Response, n
     }
 
     // 2. Check guest token header for anonymous sessions
-    const guestHeader = req.headers['x-zelqora-guest-token'];
+    const guestHeader = req.headers['x-zelqora-guest-token'] || req.headers['x-guest-token'];
     if (typeof guestHeader === 'string' && guestHeader.trim().length > 0) {
       req.guestToken = guestHeader.trim();
     }

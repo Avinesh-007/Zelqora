@@ -304,56 +304,88 @@ export class DocumentationService {
 
   /**
    * Search and retrieve official documentation references matching problem keywords,
-   * category, or error messages.
+   * category, or error messages. Strictly excludes unrelated topics.
    */
   public static search(query: string, category?: string, limit: number = 4): DocumentationRef[] {
     const qLower = query.toLowerCase();
     const catLower = (category || '').toLowerCase();
     const results: { ref: DocumentationRef; score: number }[] = [];
 
+    // Common generic words that should not count as specific topic matches
+    const stopWords = new Set([
+      'the', 'and', 'with', 'for', 'from', 'when', 'into', 'that', 'this', 'what',
+      'which', 'does', 'been', 'have', 'more', 'code', 'file', 'make', 'help', 'user',
+      'work', 'page', 'error', 'failed', 'issue', 'problem', 'test', 'run', 'using',
+      'container', 'system', 'application', 'service', 'server', 'client', 'running',
+      'start', 'docker', 'python', 'node', 'react', 'postgres', 'postgresql', 'sqlite', 'git'
+    ]);
+
+    const words = qLower
+      .split(/[^a-zA-Z0-9_.-]+/)
+      .filter(w => w.length > 2 && !stopWords.has(w));
+
     for (const source of APPROVED_DOC_SOURCES) {
-      let sourceBonus = 0;
-      if (catLower && source.category.toLowerCase().includes(catLower)) {
-        sourceBonus = 15;
-      } else if (qLower.includes(source.id) || qLower.includes(source.category.toLowerCase())) {
-        sourceBonus = 10;
-      }
+      const isSourceCategoryMatch = catLower && source.category.toLowerCase().includes(catLower);
+      const isSourceIdMatch = qLower.includes(source.id) || qLower.includes(source.category.toLowerCase());
 
       for (const topic of source.verified_topics) {
-        let score = sourceBonus;
-        const topicLower = topic.topic.toLowerCase();
+        let topicScore = 0;
+        const topicKey = topic.topic.toLowerCase();
         const titleLower = topic.title.toLowerCase();
         const summaryLower = topic.summary.toLowerCase();
 
-        // Check keyword matches
-        const words = qLower.split(/[^a-zA-Z0-9_-]+/).filter(w => w.length > 2);
+        // 1. Specific technical keyword matches against the topic itself
         for (const word of words) {
-          if (topicLower.includes(word)) score += 12;
-          if (titleLower.includes(word)) score += 8;
-          if (summaryLower.includes(word)) score += 4;
+          if (topicKey === word) {
+            topicScore += 30;
+          } else if (topicKey.includes(word)) {
+            topicScore += 20;
+          }
+          if (titleLower.includes(` ${word} `) || titleLower.startsWith(`${word} `) || titleLower.endsWith(` ${word}`)) {
+            topicScore += 16;
+          } else if (titleLower.includes(word)) {
+            topicScore += 8;
+          }
+          if (summaryLower.includes(word)) {
+            topicScore += 4;
+          }
         }
 
-        // Exact error code match (e.g. 137, OOMKilled, ECONNREFUSED, CORS)
-        if (qLower.includes('137') || qLower.includes('oom')) {
-          if (topicLower.includes('oom')) score += 30;
+        // 2. High-precision technical phrase and error signature matches
+        if ((qLower.includes('137') || qLower.includes('oom')) && topicKey.includes('oom')) {
+          topicScore += 50;
         }
-        if (qLower.includes('cors') || qLower.includes('access-control')) {
-          if (topicLower.includes('cors')) score += 30;
+        if ((qLower.includes('cors') || qLower.includes('access-control') || qLower.includes('preflight')) && topicKey.includes('cors')) {
+          topicScore += 50;
         }
-        if (qLower.includes('connection') || qLower.includes('max_connections') || qLower.includes('pool')) {
-          if (topicLower.includes('connection')) score += 25;
+        if ((qLower.includes('connection slots') || qLower.includes('max_connections') || (qLower.includes('postgres') && qLower.includes('pool'))) && topicKey.includes('connections')) {
+          topicScore += 50;
         }
-        if (qLower.includes('modulenotfound') || qLower.includes('venv') || qLower.includes('virtualenv')) {
-          if (topicLower.includes('venv') || topicLower.includes('exceptions')) score += 25;
+        if ((qLower.includes('modulenotfound') || qLower.includes('no module named') || qLower.includes('venv') || qLower.includes('virtualenv')) && (topicKey.includes('venv') || topicKey.includes('exceptions'))) {
+          topicScore += 50;
         }
-        if (qLower.includes('hydration')) {
-          if (topicLower.includes('hydration')) score += 30;
+        if (qLower.includes('hydration') && topicKey.includes('hydration')) {
+          topicScore += 50;
         }
-        if (qLower.includes('merge') || qLower.includes('conflict')) {
-          if (topicLower.includes('merge')) score += 30;
+        if ((qLower.includes('heap') || qLower.includes('heap_size_limit') || qLower.includes('max-old-space-size')) && (topicKey.includes('process') || topicKey.includes('memory'))) {
+          topicScore += 45;
+        }
+        if ((qLower.includes('git merge') || qLower.includes('conflict') || qLower.includes('merge conflict')) && topicKey.includes('merge')) {
+          topicScore += 50;
+        }
+        if (qLower.includes('reflog') && topicKey.includes('reflog')) {
+          topicScore += 50;
+        }
+        if ((qLower.includes('econnrefused') || qLower.includes('502') || qLower.includes('bad gateway') || qLower.includes('status code')) && topicKey.includes('status-codes')) {
+          topicScore += 45;
         }
 
-        if (score > 5) {
+        // CRITICAL: Only consider topics with direct, genuine match with the problem (>= 20 score)
+        // Source relevance acts only as a booster for genuinely matching topics
+        if (topicScore >= 20) {
+          if (isSourceCategoryMatch) topicScore += 10;
+          if (isSourceIdMatch) topicScore += 5;
+
           results.push({
             ref: {
               title: topic.title,
@@ -362,7 +394,7 @@ export class DocumentationService {
               relevant_excerpt: topic.summary,
               verified: true
             },
-            score
+            score: topicScore
           });
         }
       }
