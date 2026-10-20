@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, AlertCircle, Sparkles, Terminal, Sliders } from 'lucide-react';
+import { ChevronDown, ChevronUp, ShieldAlert, Sparkles, Terminal, Sliders } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input, Textarea } from '../ui/Input';
 import { Card } from '../ui/Card';
@@ -13,6 +13,7 @@ interface ProblemIntakeFormProps {
     environment: EnvironmentInfo;
   }) => Promise<void>;
   loading: boolean;
+  initialDescription?: string;
 }
 
 const CATEGORIES = [
@@ -24,7 +25,7 @@ const CATEGORIES = [
   'HTTP APIs & CORS',
   'Git & Version Control',
   'Deployment & Cloud',
-  'Other Software Defect'
+  'Other Technical Issue'
 ];
 
 const STARTER_PROBLEMS = [
@@ -66,10 +67,14 @@ const STARTER_PROBLEMS = [
   }
 ];
 
-export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, loading }) => {
+export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ 
+  onSubmit, 
+  loading,
+  initialDescription = ''
+}) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(initialDescription);
   const [showEnvFields, setShowEnvFields] = useState(false);
 
   // Environment Fields
@@ -96,7 +101,7 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
     if (!description.trim()) return;
 
     await onSubmit({
-      title: title.trim() || 'Technical Troubleshooting Session',
+      title: title.trim() || description.slice(0, 60).trim(),
       category,
       description: description.trim(),
       environment: {
@@ -115,23 +120,21 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Header & Starters */}
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Terminal className="w-5 h-5 text-blue-600" />
-              <span>Describe the Technical Issue</span>
+              <span>Describe the Problem</span>
             </h2>
-            <span className="text-xs text-slate-500 font-medium">Step 1 of Adaptive Diagnostic</span>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed mb-4">
-            Provide the problem symptoms, error messages, and observations. Zelqora will formulate ranked hypotheses, check verified official docs, and prescribe safe tests.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Provide the symptoms, error messages, and what you observe. Zelqora will rank probable causes, reference official documentation, and suggest safe checks for you to run.
           </p>
 
-          {/* Quick Problem Starters */}
-          <div className="space-y-1.5 mb-6">
-            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Try an example troubleshooting starter:</span>
+          {/* Example Starters */}
+          <div className="pt-2 space-y-1.5">
+            <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+              Example Problems (click to load sample context):
             </div>
             <div className="flex flex-wrap gap-2">
               {STARTER_PROBLEMS.map((starter, idx) => (
@@ -139,8 +142,9 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
                   key={idx}
                   type="button"
                   onClick={() => applyStarter(starter)}
-                  className="text-left text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-200 text-slate-700 transition-colors"
+                  className="text-left text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 transition-colors"
                 >
+                  <span className="text-slate-400 mr-1 text-[10px]">Example:</span>
                   <span className="font-medium text-slate-900">{starter.title.split(':')[0]}</span>
                 </button>
               ))}
@@ -152,7 +156,7 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <Input
-              label="Investigation Title / Problem Summary"
+              label="Problem Summary / Title"
               placeholder="e.g. Docker container exits with code 137 OOMKilled"
               value={title}
               onChange={e => setTitle(e.target.value)}
@@ -176,8 +180,8 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
         </div>
 
         <Textarea
-          label="Detailed Problem Description & Observed Symptoms"
-          placeholder="Describe what occurred, how the failure manifests, and what behavior was expected instead..."
+          label="Detailed Description & Symptoms"
+          placeholder="Explain what happened, what command or action triggered the failure, and what behavior you expected..."
           rows={4}
           value={description}
           onChange={e => setDescription(e.target.value)}
@@ -189,11 +193,11 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
           <button
             type="button"
             onClick={() => setShowEnvFields(!showEnvFields)}
-            className="w-full px-4 py-3 flex items-center justify-between text-left text-xs font-semibold text-slate-700 hover:bg-slate-100/70 transition-colors"
+            className="w-full px-4 py-3 flex items-center justify-between text-left text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <span className="flex items-center gap-2">
               <Sliders className="w-4 h-4 text-slate-500" />
-              <span>Optional Environment & Context Fields (OS, Runtime, Error, Logs)</span>
+              <span>Optional Environment Details (OS, Runtime, Error, Logs)</span>
             </span>
             {showEnvFields ? (
               <ChevronUp className="w-4 h-4 text-slate-500" />
@@ -226,7 +230,7 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
               </div>
 
               <Input
-                label="Exact Error Message or Exception String"
+                label="Exact Error Message"
                 placeholder="e.g. FATAL: remaining connection slots are reserved for non-replication superuser connections"
                 value={errorMessage}
                 onChange={e => setErrorMessage(e.target.value)}
@@ -234,14 +238,14 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Textarea
-                  label="Relevant Log Excerpt (Sanitized)"
+                  label="Relevant Log Lines"
                   placeholder="Paste stack traces or log lines here..."
                   rows={3}
                   value={logs}
                   onChange={e => setLogs(e.target.value)}
                 />
                 <Textarea
-                  label="Configuration Excerpt"
+                  label="Configuration Snippet"
                   placeholder="e.g. compose.yaml, tsconfig.json, postgresql.conf snippet..."
                   rows={3}
                   value={configContext}
@@ -252,13 +256,13 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
           )}
         </div>
 
-        {/* Privacy & Redaction Warning Alert */}
+        {/* Reassuring Safety Notice */}
         <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-lg flex items-start gap-2.5 text-xs text-amber-900">
-          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-0.5">
-            <span className="font-semibold">Confidentiality Notice:</span>
+            <span className="font-semibold">Safety Reminder:</span>
             <p className="text-amber-800 leading-relaxed text-[11px]">
-              Zelqora automatically filters known API keys, AWS credentials, tokens, and database passwords before analysis. Always ensure private proprietary business secrets are sanitized before submitting.
+              Do not include passwords, API keys, private keys, or personal customer information. Always review your logs before submitting.
             </p>
           </div>
         </div>
@@ -272,7 +276,7 @@ export const ProblemIntakeForm: React.FC<ProblemIntakeFormProps> = ({ onSubmit, 
             loading={loading}
             className="w-full sm:w-auto"
           >
-            Start Diagnostic Investigation
+            Diagnose Problem
           </Button>
         </div>
 

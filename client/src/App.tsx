@@ -15,7 +15,6 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { MethodologyPage } from './pages/MethodologyPage';
 import { EditorialPolicyPage } from './pages/EditorialPolicyPage';
-import { AdSenseReadinessPage } from './pages/AdSenseReadinessPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export const App: React.FC = () => {
@@ -36,7 +35,6 @@ export const App: React.FC = () => {
             <Route path="terms" element={<TermsPage />} />
             <Route path="methodology" element={<MethodologyPage />} />
             <Route path="editorial-policy" element={<EditorialPolicyPage />} />
-            <Route path="adsense-readiness" element={<AdSenseReadinessPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

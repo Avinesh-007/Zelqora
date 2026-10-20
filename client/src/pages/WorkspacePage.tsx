@@ -11,7 +11,8 @@ import {
   X, 
   HelpCircle,
   ShieldCheck,
-  Send
+  Send,
+  Info
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Investigation, InvestigationTurn, EnvironmentInfo } from '../types';
@@ -34,9 +35,8 @@ export const WorkspacePage: React.FC = () => {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [engineMode, setEngineMode] = useState<string>('gemini_live');
+  const [engineMode, setEngineMode] = useState<string>('local_diagnostic_engine');
 
-  // Load investigation history on mount
   useEffect(() => {
     loadHistory();
   }, []);
@@ -47,11 +47,9 @@ export const WorkspacePage: React.FC = () => {
       const res = await api.listInvestigations();
       setInvestigations(res.investigations);
 
-      // If an initial description was passed via router state from homepage, we keep active null to show intake
       if (location.state?.initialDescription) {
         setActiveInvestigation(null);
       } else if (res.investigations.length > 0 && !activeInvestigation) {
-        // Load the most recent investigation details
         loadInvestigation(res.investigations[0].id);
       }
     } catch (err: any) {
@@ -67,7 +65,7 @@ export const WorkspacePage: React.FC = () => {
     try {
       const res = await api.getInvestigation(id);
       setActiveInvestigation(res.investigation);
-      setSidebarOpen(false); // Close mobile drawer
+      setSidebarOpen(false);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to load investigation.');
     } finally {
@@ -75,7 +73,6 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
-  // Start new investigation intake
   const handleCreateInvestigation = async (data: {
     title: string;
     category: string;
@@ -88,7 +85,6 @@ export const WorkspacePage: React.FC = () => {
       const res = await api.createInvestigation(data);
       setActiveInvestigation(res.investigation);
       setEngineMode(res.diagnostic_engine_mode);
-      // Reload history
       await loadHistory();
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to start diagnostic investigation.');
@@ -97,7 +93,6 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
-  // Submit test output (advance turn)
   const handleSubmitEvidence = async (testOutput: string) => {
     if (!activeInvestigation) return;
     setActionLoading(true);
@@ -106,7 +101,6 @@ export const WorkspacePage: React.FC = () => {
       const res = await api.submitTurn(activeInvestigation.id, {
         test_output: testOutput
       });
-      // Append new turn to current active investigation
       setActiveInvestigation(prev => {
         if (!prev) return null;
         return {
@@ -123,7 +117,6 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
-  // Rollback to turn
   const handleRollback = async (turnIndex: number) => {
     if (!activeInvestigation) return;
     setActionLoading(true);
@@ -137,7 +130,6 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
-  // Mark resolved
   const handleResolve = async (notes: string) => {
     if (!activeInvestigation) return;
     setActionLoading(true);
@@ -152,7 +144,20 @@ export const WorkspacePage: React.FC = () => {
     }
   };
 
-  // Delete investigation
+  const handleAbandon = async (notes: string) => {
+    if (!activeInvestigation) return;
+    setActionLoading(true);
+    try {
+      const res = await api.resolveInvestigation(activeInvestigation.id, 'abandoned', notes);
+      setActiveInvestigation(res.investigation);
+      await loadHistory();
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to mark as unresolved.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     try {
       await api.deleteInvestigation(id);
@@ -172,7 +177,7 @@ export const WorkspacePage: React.FC = () => {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-slate-100/60">
       
-      {/* Desktop History Sidebar (w-80) */}
+      {/* Desktop History Sidebar */}
       <div className="hidden md:block w-80 shrink-0 border-r border-slate-200 bg-white">
         <HistorySidebar
           investigations={investigations}
@@ -247,27 +252,41 @@ export const WorkspacePage: React.FC = () => {
 
         <div className="max-w-4xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
           
-          {/* Case 1: No active investigation selected -> show intake form */}
+          {/* Intake view when no active session selected */}
           {!activeInvestigation ? (
             <div className="space-y-6">
               <div className="space-y-1">
                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                  Start New Technical Investigation
+                  Diagnose a Technical Problem
                 </h1>
                 <p className="text-xs text-slate-500">
-                  Step 1 of the adaptive diagnostic process. Redacted and grounded in official documentation.
+                  Enter the details of your technical issue below. You will receive ranked probable causes, safe diagnostic tests, and step-by-step guidance.
                 </p>
               </div>
 
               <ProblemIntakeForm
                 onSubmit={handleCreateInvestigation}
                 loading={actionLoading}
+                initialDescription={location.state?.initialDescription || ''}
               />
             </div>
           ) : (
-            /* Case 2: Active Investigation in progress */
+            /* Active Investigation View */
             <div className="space-y-6">
               
+              {/* Honest Notice for Offline Fallback Mode */}
+              {engineMode === 'local_diagnostic_engine' && (
+                <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <span className="font-semibold text-blue-950">Local Pattern Diagnostic Mode:</span>
+                    <p className="text-blue-800 leading-relaxed text-[11px]">
+                      This diagnosis is generated using verified offline diagnostic patterns because no Gemini API key is configured on the server. For live generative reasoning, set <code>GEMINI_API_KEY</code> in the server <code>.env</code> file.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Investigation Header */}
               <div className="p-5 rounded-xl border border-slate-200 bg-white shadow-xs space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -276,7 +295,7 @@ export const WorkspacePage: React.FC = () => {
                       {activeInvestigation.category}
                     </span>
                     <Badge variant={activeInvestigation.status === 'resolved' ? 'green' : 'blue'}>
-                      {activeInvestigation.status === 'resolved' ? 'Resolved' : 'Active Investigation'}
+                      {activeInvestigation.status === 'resolved' ? 'Resolved' : 'Active Diagnosis'}
                     </Badge>
                   </div>
 
@@ -291,12 +310,12 @@ export const WorkspacePage: React.FC = () => {
                 </h1>
 
                 <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                  <strong>Initial Symptom:</strong> {activeInvestigation.initial_description}
+                  <strong>Initial Issue:</strong> {activeInvestigation.initial_description}
                 </p>
 
-                {/* Progress Timeline Stepper */}
+                {/* Progress Stepper */}
                 <div className="pt-2 flex items-center gap-2 text-xs">
-                  <span className="font-semibold text-slate-700">Timeline Progress:</span>
+                  <span className="font-semibold text-slate-700">Diagnostic Step:</span>
                   <div className="flex items-center gap-1.5 overflow-x-auto py-1">
                     {activeInvestigation.turns?.map((turn, tIdx) => (
                       <span
@@ -307,7 +326,7 @@ export const WorkspacePage: React.FC = () => {
                             : 'bg-slate-200 text-slate-700'
                         }`}
                       >
-                        Turn {turn.turn_index}
+                        Step {turn.turn_index}
                       </span>
                     ))}
                   </div>
@@ -322,19 +341,19 @@ export const WorkspacePage: React.FC = () => {
                   <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50 text-slate-900 space-y-1.5 shadow-2xs">
                     <div className="text-[11px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
                       <Terminal className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Diagnostic Summary (Turn {latestTurn.turn_index})</span>
+                      <span>Diagnostic Summary (Step {latestTurn.turn_index})</span>
                     </div>
                     <p className="text-sm font-medium leading-relaxed text-slate-800">
                       {latestTurn.assessment.summary}
                     </p>
                   </div>
 
-                  {/* Clarifying Questions (if any) */}
+                  {/* Clarifying Questions */}
                   {latestTurn.assessment.clarifying_questions && latestTurn.assessment.clarifying_questions.length > 0 && (
                     <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 text-amber-950 space-y-2">
                       <div className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
                         <HelpCircle className="w-4 h-4 text-amber-600" />
-                        <span>Clarifying Questions to Isolate Cause:</span>
+                        <span>Questions to Help Narrow Down the Cause:</span>
                       </div>
                       <ul className="list-disc list-inside space-y-1 text-xs text-amber-900">
                         {latestTurn.assessment.clarifying_questions.map((q, qIdx) => (
@@ -372,6 +391,7 @@ export const WorkspacePage: React.FC = () => {
                     status={activeInvestigation.status}
                     resolutionNotes={activeInvestigation.resolution_notes}
                     onResolve={handleResolve}
+                    onAbandon={handleAbandon}
                     onRollback={handleRollback}
                     onNewInvestigation={() => setActiveInvestigation(null)}
                     loading={actionLoading}

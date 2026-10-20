@@ -45,7 +45,6 @@ export const ContactPage: React.FC = () => {
               <div>
                 <span className="text-slate-400 font-medium block">Technical Inquiries:</span>
                 <span className="font-mono text-slate-800">support@zelqora.example.com</span>
-                <span className="text-[10px] text-amber-600 block mt-0.5">(Configurable in .env / production)</span>
               </div>
 
               <div>

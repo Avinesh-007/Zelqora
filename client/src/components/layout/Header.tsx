@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Activity, ShieldCheck, Cpu, Menu, X, User as UserIcon, LogOut, BookOpen, Layers } from 'lucide-react';
+import { Activity, Menu, X, User as UserIcon, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
@@ -17,23 +16,6 @@ export const Header: React.FC = () => {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authSubmitting, setAuthSubmitting] = useState(false);
-  const [engineStatus, setEngineStatus] = useState<{ mode: string; live: boolean }>({
-    mode: 'Checking...',
-    live: false
-  });
-
-  useEffect(() => {
-    api.getHealth()
-      .then(res => {
-        setEngineStatus({
-          mode: res.ai_engine.api_key_configured ? 'Gemini 2.5 Live' : 'Deterministic Engine',
-          live: res.ai_engine.api_key_configured
-        });
-      })
-      .catch(() => {
-        setEngineStatus({ mode: 'Diagnostic Engine', live: false });
-      });
-  }, []);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,10 +38,9 @@ export const Header: React.FC = () => {
   };
 
   const navLinks = [
-    { label: 'Workspace', path: '/troubleshoot' },
+    { label: 'Diagnose Problem', path: '/troubleshoot' },
     { label: 'Guides', path: '/guides' },
-    { label: 'Docs Registry', path: '/docs/sources' },
-    { label: 'Methodology', path: '/methodology' },
+    { label: 'Documentation', path: '/docs/sources' },
     { label: 'About', path: '/about' }
   ];
 
@@ -78,9 +59,6 @@ export const Header: React.FC = () => {
                 <div>
                   <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
                     Zelqora
-                  </span>
-                  <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                    Troubleshoot
                   </span>
                 </div>
               </Link>
@@ -107,21 +85,11 @@ export const Header: React.FC = () => {
               </nav>
             </div>
 
-            {/* Right Header: Engine indicator, Auth, and Primary Action */}
+            {/* Right Header: Account & Primary Action */}
             <div className="hidden sm:flex items-center gap-3">
-              {/* Engine Status indicator */}
-              <div 
-                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-slate-50 border-slate-200 text-slate-600"
-                title={engineStatus.live ? 'Connected directly to Google Gemini API' : 'Operating with local verified diagnostic engine'}
-              >
-                <span className={`w-2 h-2 rounded-full ${engineStatus.live ? 'bg-emerald-500 animate-pulse' : 'bg-blue-500'}`} />
-                <span>{engineStatus.mode}</span>
-              </div>
-
-              {/* Auth button or User info */}
               {user ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-600 font-medium px-2 py-1 bg-slate-100 rounded-md truncate max-w-[150px]">
+                  <span className="text-xs text-slate-600 font-medium px-2 py-1 bg-slate-100 rounded-md truncate max-w-[160px]">
                     {user.email}
                   </span>
                   {user.role === 'editor' || user.role === 'admin' ? (
@@ -144,7 +112,7 @@ export const Header: React.FC = () => {
               ) : (
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => {
                     setAuthMode('login');
                     setAuthModalOpen(true);
@@ -157,7 +125,7 @@ export const Header: React.FC = () => {
 
               <Link to="/troubleshoot">
                 <Button size="sm" variant="primary">
-                  Start Investigation
+                  Diagnose a Problem
                 </Button>
               </Link>
             </div>
@@ -166,7 +134,7 @@ export const Header: React.FC = () => {
             <div className="flex sm:hidden items-center gap-2">
               <Link to="/troubleshoot">
                 <Button size="sm" variant="primary">
-                  Investigate
+                  Diagnose
                 </Button>
               </Link>
               <button
@@ -200,11 +168,18 @@ export const Header: React.FC = () => {
                 </Link>
               ))}
               <Link
-                to="/adsense-readiness"
+                to="/methodology"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50"
               >
-                AdSense Readiness
+                Methodology & Safety
+              </Link>
+              <Link
+                to="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50"
+              >
+                Contact
               </Link>
             </div>
 

@@ -21,8 +21,7 @@ export class SeoService {
       { loc: `${baseUrl}/privacy`, priority: '0.5', changefreq: 'monthly' },
       { loc: `${baseUrl}/terms`, priority: '0.5', changefreq: 'monthly' },
       { loc: `${baseUrl}/methodology`, priority: '0.7', changefreq: 'monthly' },
-      { loc: `${baseUrl}/editorial-policy`, priority: '0.7', changefreq: 'monthly' },
-      { loc: `${baseUrl}/adsense-readiness`, priority: '0.6', changefreq: 'monthly' }
+      { loc: `${baseUrl}/editorial-policy`, priority: '0.7', changefreq: 'monthly' }
     ];
 
     // Dynamic published guides only
@@ -75,7 +74,6 @@ Allow: /privacy
 Allow: /terms
 Allow: /methodology
 Allow: /editorial-policy
-Allow: /adsense-readiness
 
 # Disallow private user sessions, diagnostics, auth, and API endpoints
 Disallow: /api/

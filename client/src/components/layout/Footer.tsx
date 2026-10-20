@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ShieldCheck, FileText, ExternalLink, HelpCircle, AlertTriangle } from 'lucide-react';
+import { Activity, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -17,100 +17,95 @@ export const Footer: React.FC = () => {
               <span className="text-lg font-bold tracking-tight">Zelqora</span>
             </Link>
             <p className="text-xs leading-relaxed text-slate-400">
-              An evidence-driven technical troubleshooting platform combining adaptive diagnostic questioning, verifiable tests, and official documentation grounding.
+              A structured technical troubleshooting platform helping engineers, developers, and administrators understand and fix software problems safely.
             </p>
             <div className="pt-1">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800 px-2.5 py-1 rounded-full">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Zero Execution on User Machines</span>
+                <span>Commands Run Locally by You</span>
               </span>
             </div>
           </div>
 
-          {/* Diagnostic Platform */}
+          {/* Diagnostic Tools */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200 mb-3.5">
-              Troubleshooting Platform
+              Tools & Resources
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link to="/troubleshoot" className="hover:text-white transition-colors">
-                  Diagnostic Workspace
+                  Diagnose an Issue
                 </Link>
               </li>
               <li>
                 <Link to="/guides" className="hover:text-white transition-colors">
-                  Reviewed Technical Guides
+                  Troubleshooting Guides
                 </Link>
               </li>
               <li>
                 <Link to="/docs/sources" className="hover:text-white transition-colors">
-                  Approved Docs Registry
+                  Official Documentation
                 </Link>
               </li>
               <li>
                 <Link to="/methodology" className="hover:text-white transition-colors">
-                  Investigation Methodology
-                </Link>
-              </li>
-              <li>
-                <Link to="/adsense-readiness" className="hover:text-white transition-colors text-blue-400 font-medium">
-                  AdSense Policy Checklist
+                  Diagnostic Methodology
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Editorial & Policies */}
+          {/* Trust & Policies */}
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200 mb-3.5">
-              Standards & Policies
+              Trust & Standards
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
+                <Link to="/about" className="hover:text-white transition-colors">
+                  About Zelqora
+                </Link>
+              </li>
+              <li>
                 <Link to="/editorial-policy" className="hover:text-white transition-colors">
-                  Editorial Review Standards
+                  Editorial Standards
                 </Link>
               </li>
               <li>
                 <Link to="/privacy" className="hover:text-white transition-colors">
-                  Privacy Policy & Data Handling
+                  Privacy Policy
                 </Link>
               </li>
               <li>
                 <Link to="/terms" className="hover:text-white transition-colors">
-                  Terms of Use & Disclaimers
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="hover:text-white transition-colors">
-                  About Zelqora Engineering
+                  Terms of Use
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-white transition-colors">
-                  Contact & Feedback
+                  Contact
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Diagnostic Safety Notice */}
+          {/* Safety Reminder */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-200">
-              Diagnostic Safety Notice
+              Safety Reminder
             </h4>
             <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700 text-xs space-y-2">
               <div className="flex items-center gap-1.5 text-amber-400 font-medium">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>Sanitize Sensitive Data</span>
+                <span>Review Before Running</span>
               </div>
               <p className="text-[11px] leading-relaxed text-slate-300">
-                While automated redaction removes common credentials and keys, always review command outputs and logs before submitting. Never submit production credentials.
+                Always review suggested shell commands before executing them on your machine. Never share passwords, private keys, or confidential production credentials.
               </p>
             </div>
             <p className="text-[11px] text-slate-400">
-              Zelqora never claims that every software or infrastructure defect can be resolved.
+              Zelqora provides structured diagnostic reasoning and cannot guarantee that every software defect can be resolved.
             </p>
           </div>
 
@@ -119,14 +114,14 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p className="text-slate-400">
-            &copy; {new Date().getFullYear()} Zelqora. Built with real Gemini AI, SQLite persistence, and verified official documentation.
+            &copy; {new Date().getFullYear()} Zelqora. Focused on safe, evidence-based technical troubleshooting.
           </p>
           <div className="flex items-center gap-4 text-slate-400">
             <Link to="/privacy" className="hover:text-slate-300">Privacy</Link>
             <span>&bull;</span>
             <Link to="/terms" className="hover:text-slate-300">Terms</Link>
             <span>&bull;</span>
-            <Link to="/editorial-policy" className="hover:text-slate-300">Editorial</Link>
+            <Link to="/methodology" className="hover:text-slate-300">Methodology</Link>
             <span>&bull;</span>
             <Link to="/contact" className="hover:text-slate-300">Contact</Link>
           </div>
