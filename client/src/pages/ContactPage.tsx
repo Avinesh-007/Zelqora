@@ -3,6 +3,7 @@ import { Mail, MessageSquare, Send, CheckCircle2, AlertCircle } from 'lucide-rea
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input, Textarea } from '../components/ui/Input';
+import { SEO } from '../components/common/SEO';
 
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -18,6 +19,11 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+      <SEO
+        title="Contact Zelqora Engineering & Issue Reporting"
+        description="Get in touch with the Zelqora technical team to report an issue, suggest a guide correction, or propose documentation sources."
+        canonicalPath="/contact"
+      />
       
       <div className="space-y-3">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">

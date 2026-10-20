@@ -518,7 +518,7 @@ export function ClientOnlyTimestamp() {
         verified: true
       }
     ],
-    status: 'in_review', // Demonstrates the editorial workflow!
+    status: 'published',
     author_name: 'Zelqora Frontend Team',
     last_reviewed_at: '2026-04-01T00:00:00.000Z'
   }

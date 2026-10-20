@@ -412,6 +412,222 @@ SELECT pg_reload_conf();`,
       };
     }
 
+    // Pattern 4: Python ModuleNotFoundError & Virtualenv / Windows Interpreter Mismatch
+    if (text.includes('modulenotfounderror') || text.includes('no module named') || (text.includes('python') && text.includes('pip')) || text.includes('virtualenv') || text.includes('venv')) {
+      return {
+        summary: 'Python package import failure or virtual environment interpreter path divergence.',
+        severity: 'medium',
+        category: 'Python & Tooling',
+        is_conclusive: Boolean(params.cleanTestOutput),
+        clarifying_questions: [
+          'Which command was used to install the package (pip, poetry, conda, pipenv)?',
+          'Are you running this script in VS Code, PyCharm, or a standalone terminal?'
+        ],
+        hypotheses: [
+          {
+            id: 'hyp_interpreter_divergence',
+            title: 'Active Interpreter Divergence from Target Environment',
+            explanation: 'The package was installed into one Python environment (e.g. global Python or another venv), but the script is executing via a different python binary.',
+            likelihood_score: 90,
+            supporting_evidence: [
+              'Package appears in pip list but import fails during script execution',
+              'Common in VS Code when the workspace interpreter does not match the terminal'
+            ]
+          },
+          {
+            id: 'hyp_missing_activation',
+            title: 'Virtual Environment Not Activated in Current Shell',
+            explanation: 'The shell session does not have the virtual environment PATH prepended.',
+            likelihood_score: 75,
+            supporting_evidence: ['Terminal prompt does not show (venv) prefix']
+          }
+        ],
+        diagnostic_tests: [
+          {
+            id: 'test_check_python_binary',
+            title: 'Compare Executable Paths for Python and pip',
+            command: 'python -c "import sys; print(sys.executable)" && python -m pip -V',
+            is_safe: true,
+            requires_elevation: false,
+            explanation: 'Verifies whether the python binary running code matches the environment pip installs packages into.',
+            expected_output_pattern: 'python.*\\.venv|site-packages',
+            what_result_means: {
+              if_matches: 'Executable and pip reside in the same environment directory.',
+              if_fails_or_differs: 'Python and pip point to different installations on your system.'
+            }
+          },
+          {
+            id: 'test_check_sys_path',
+            title: 'Inspect Python Module Lookup Paths',
+            command: 'python -c "import sys; print(\'\\n\'.join(sys.path))"',
+            is_safe: true,
+            requires_elevation: false,
+            explanation: 'Prints the exact directories Python searches for imported modules.',
+            expected_output_pattern: 'site-packages',
+            what_result_means: {
+              if_matches: 'Confirms which site-packages folder is currently active.',
+              if_fails_or_differs: 'Virtual environment site-packages is missing from sys.path.'
+            }
+          }
+        ],
+        recommended_solution: [
+          {
+            step_number: 1,
+            title: 'Install Directly Through python -m pip',
+            instructions: 'Always invoke pip as a module through your target Python binary to guarantee 100% environment parity.',
+            code_snippet: `# On Windows PowerShell:
+.\\.venv\\Scripts\\python.exe -m pip install <package_name>
+
+# On Linux / macOS:
+./.venv/bin/python -m pip install <package_name>`,
+            language: 'bash'
+          },
+          {
+            step_number: 2,
+            title: 'Select Matching Interpreter in Your Editor',
+            instructions: 'In VS Code, press Ctrl+Shift+P (or Cmd+Shift+P), run "Python: Select Interpreter", and pick the interpreter inside your workspace .venv directory.',
+            caution_notes: 'On Windows, if PowerShell blocks activation script with PSSecurityException, run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser'
+          }
+        ],
+        documentation_references: params.docReferences,
+        safety_warnings: [
+          'Avoid using "sudo pip install" on macOS or Linux, as this can corrupt operating system system packages.'
+        ]
+      };
+    }
+
+    // Pattern 5: Node.js JavaScript Heap Out of Memory
+    if (text.includes('heap out of memory') || text.includes('javascript heap') || text.includes('heap limit') || text.includes('allocation failed - javascript heap out of memory')) {
+      return {
+        summary: 'Node.js V8 JavaScript heap exhaustion: process ran out of allocated memory for object allocation.',
+        severity: 'critical',
+        category: 'Node.js',
+        is_conclusive: Boolean(params.cleanTestOutput),
+        clarifying_questions: [
+          'Does memory grow monotonically over time (leak) or spike suddenly on a single batch operation?',
+          'What is the current Node.js version and memory limit of the machine or container?'
+        ],
+        hypotheses: [
+          {
+            id: 'hyp_default_v8_heap_limit',
+            title: 'Exceeding Default V8 Heap Ceiling on Heavy Data Processing',
+            explanation: 'Node.js defaults V8 heap to ~1.4GB - 4GB. Parsing large JSON files, bulk CSVs, or huge database result sets in a single tick exceeds this ceiling.',
+            likelihood_score: 85,
+            supporting_evidence: ['Occurs during build tools, large migrations, or unpaginated API fetches']
+          },
+          {
+            id: 'hyp_unbounded_memory_leak',
+            title: 'Unbounded In-Memory Cache or Event Listener Accumulation',
+            explanation: 'Objects or event closures are added to global maps/arrays without TTL or eviction, preventing garbage collection.',
+            likelihood_score: 75,
+            supporting_evidence: ['Process crashes after hours of running in production']
+          }
+        ],
+        diagnostic_tests: [
+          {
+            id: 'test_inspect_v8_heap_stats',
+            title: 'Inspect V8 Heap Statistics and Current Limit',
+            command: 'node -e "const v8 = require(\'v8\'); console.log(v8.getHeapStatistics())"',
+            is_safe: true,
+            requires_elevation: false,
+            explanation: 'Returns the exact heap_size_limit in bytes configured for the current runtime.',
+            expected_output_pattern: 'heap_size_limit',
+            what_result_means: {
+              if_matches: 'Confirms current maximum heap threshold in bytes.',
+              if_fails_or_differs: 'Command failed or syntax discrepancy.'
+            }
+          }
+        ],
+        recommended_solution: [
+          {
+            step_number: 1,
+            title: 'Increase Max Old Space Size via CLI Flag or Environment Variable',
+            instructions: 'Raise the V8 heap limit to an appropriate size (e.g. 4GB = 4096MB) before running your script.',
+            code_snippet: `# In package.json scripts or terminal:
+node --max-old-space-size=4096 server.js
+
+# Or set globally via environment variable:
+export NODE_OPTIONS="--max-old-space-size=4096"`,
+            language: 'bash',
+            rollback_instructions: 'Unset NODE_OPTIONS or remove --max-old-space-size flag.'
+          },
+          {
+            step_number: 2,
+            title: 'Use Streams for Large Payloads Instead of Buffering in Memory',
+            instructions: 'Refactor bulk file or data transformations to use stream.pipeline instead of fs.readFileSync or monolithic arrays.',
+            caution_notes: 'Verify your machine or container has sufficient physical RAM to support the increased heap limit.'
+          }
+        ],
+        documentation_references: params.docReferences,
+        safety_warnings: [
+          'Setting --max-old-space-size higher than the host system\'s available RAM will cause the OS or Linux OOM killer to terminate the entire process abruptly.'
+        ]
+      };
+    }
+
+    // Pattern 6: 502 Bad Gateway / ECONNREFUSED
+    if (text.includes('502') || text.includes('bad gateway') || text.includes('econnrefused') || text.includes('upstream prematurely closed')) {
+      return {
+        summary: 'Reverse proxy / gateway connection failure: upstream backend service is unreachable or not accepting connections.',
+        severity: 'high',
+        category: 'HTTP & APIs',
+        is_conclusive: Boolean(params.cleanTestOutput),
+        clarifying_questions: [
+          'Is the backend process running and listening on the exact port specified in the proxy config?',
+          'Is the backend bound to 127.0.0.1 (IPv4), ::1 (IPv6), or 0.0.0.0 (all interfaces)?'
+        ],
+        hypotheses: [
+          {
+            id: 'hyp_upstream_crashed_or_stopped',
+            title: 'Upstream Application Process Stopped or Crashed',
+            explanation: 'The reverse proxy (Nginx, Caddy, or cloud load balancer) forwarded the request, but the target backend port has no listening process.',
+            likelihood_score: 85,
+            supporting_evidence: ['Immediate 502 Bad Gateway response with ECONNREFUSED in upstream logs']
+          },
+          {
+            id: 'hyp_ipv6_ipv4_localhost_mismatch',
+            title: 'Localhost IPv6 vs IPv4 Address Resolution Mismatch',
+            explanation: 'The proxy resolves "localhost" to ::1 (IPv6), but Node.js or Python is only listening on 127.0.0.1 (IPv4).',
+            likelihood_score: 75,
+            supporting_evidence: ['Common in Node 18+ and modern Linux/macOS systems']
+          }
+        ],
+        diagnostic_tests: [
+          {
+            id: 'test_check_backend_listener',
+            title: 'Verify Backend Listener Port and Status',
+            command: 'curl -i http://127.0.0.1:<PORT>/api/health',
+            is_safe: true,
+            requires_elevation: false,
+            explanation: 'Tests direct connection to the backend bypassing the reverse proxy.',
+            expected_output_pattern: 'HTTP/1.1 200',
+            what_result_means: {
+              if_matches: 'Backend is running correctly; problem is proxy configuration or routing.',
+              if_fails_or_differs: 'Backend process is not running or crashed on startup.'
+            }
+          }
+        ],
+        recommended_solution: [
+          {
+            step_number: 1,
+            title: 'Use Explicit 127.0.0.1 Instead of "localhost" in Proxy Upstream',
+            instructions: 'In your Nginx or reverse proxy configuration, change proxy_pass http://localhost:PORT to proxy_pass http://127.0.0.1:PORT.',
+            code_snippet: `location /api/ {
+    proxy_pass http://127.0.0.1:3001;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+}`,
+            language: 'nginx'
+          }
+        ],
+        documentation_references: params.docReferences,
+        safety_warnings: [
+          'Verify firewall rules do not expose internal backend ports directly to the public internet.'
+        ]
+      };
+    }
+
     // Default General Technical Problem Assessment
     return {
       summary: `Systematic technical assessment for: ${params.cleanDescription.slice(0, 120)}...`,

@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { DocSource } from '../types';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const DocumentationSourcesPage: React.FC = () => {
   const [sources, setSources] = useState<DocSource[]>([]);
@@ -34,6 +35,11 @@ export const DocumentationSourcesPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <SEO
+        title="Official Technical Documentation Registry — Zelqora"
+        description="Explore the curated, verified documentation sources and official domains that ground Zelqora's diagnostic recommendations."
+        canonicalPath="/docs/sources"
+      />
       
       {/* Header */}
       <div className="space-y-3">

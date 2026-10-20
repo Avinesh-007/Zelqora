@@ -1,10 +1,16 @@
 import React from 'react';
 import { Layers, Terminal, ShieldCheck, CheckCircle2, AlertTriangle, HelpCircle } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const MethodologyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      <SEO
+        title="Diagnostic Methodology & Limitations — Zelqora"
+        description="Learn how Zelqora's 10-step adaptive diagnostic protocol isolates technical failures, ranks hypotheses by likelihood, and prioritizes production safety."
+        canonicalPath="/methodology"
+      />
       
       <div className="space-y-3 border-b border-slate-200 pb-6">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">

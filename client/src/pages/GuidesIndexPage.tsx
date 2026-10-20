@@ -5,6 +5,7 @@ import { api } from '../services/api';
 import { Guide } from '../types';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const GuidesIndexPage: React.FC = () => {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -38,6 +39,11 @@ export const GuidesIndexPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <SEO
+        title="Technical Troubleshooting Guides Directory — Zelqora"
+        description="Browse tested, verified technical troubleshooting guides for Docker, Node.js, Python, PostgreSQL, and React. Step-by-step solutions with rollback guidance."
+        canonicalPath="/guides"
+      />
       
       {/* Title & Intro */}
       <div className="space-y-3">

@@ -125,7 +125,7 @@ export const Header: React.FC = () => {
 
               <Link to="/troubleshoot">
                 <Button size="sm" variant="primary">
-                  Diagnose a Problem
+                  Diagnose My Problem
                 </Button>
               </Link>
             </div>

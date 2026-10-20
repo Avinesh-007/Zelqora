@@ -1,10 +1,16 @@
 import React from 'react';
 import { ShieldCheck, Lock, Eye, Database, Server } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const PrivacyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      <SEO
+        title="Privacy Policy — Zelqora Technical Troubleshooting"
+        description="Learn how Zelqora handles technical diagnostic inputs, automated secret redaction, external AI processing, and your data deletion rights."
+        canonicalPath="/privacy"
+      />
       
       <div className="space-y-3 border-b border-slate-200 pb-6">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
@@ -82,10 +88,7 @@ export const PrivacyPage: React.FC = () => {
             5. Cookies & Local Storage
           </h2>
           <p>
-            Zelqora uses essential <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">HttpOnly</code>, <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">SameSite=Lax</code> cookies exclusively for authentication sessions. We do not use third-party tracking cookies or social network beacons.
-          </p>
-          <p>
-            If monetization or Google AdSense is enabled by the site operator in the future, standard advertising cookies (such as the Google DoubleClick cookie) may be deployed to serve relevant ads. You will be provided notice and controls per Google Publisher Policies.
+            Zelqora uses essential <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">HttpOnly</code>, <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">SameSite=Lax</code> cookies exclusively to maintain secure authentication sessions. We also store a random anonymous guest token in your browser's local storage so you can refresh or return to your active troubleshooting investigations without losing progress. We do not use third-party tracking cookies, cross-site trackers, or social media beacons.
           </p>
         </section>
 

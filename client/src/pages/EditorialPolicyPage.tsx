@@ -1,20 +1,26 @@
 import React from 'react';
 import { ShieldAlert, CheckCircle2, FileCheck, RefreshCw, Mail } from 'lucide-react';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const EditorialPolicyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      <SEO
+        title="Editorial Standards & Review Policy — Zelqora"
+        description="Learn how Zelqora verifies troubleshooting guides through empirical testing, official documentation grounding, and strict human technical review."
+        canonicalPath="/editorial-policy"
+      />
       
       <div className="space-y-3 border-b border-slate-200 pb-6">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
           Content Integrity & Quality Standards
         </span>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Editorial Review & Correction Policy
+          Editorial Standards & Review Policy
         </h1>
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-          How Zelqora ensures technical accuracy, prevents mass-generated AI spam, and handles content updates.
+          How Zelqora researches, verifies, and updates public technical troubleshooting guides.
         </p>
       </div>
 

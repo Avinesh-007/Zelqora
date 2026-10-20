@@ -26,6 +26,7 @@ import { HistorySidebar } from '../components/investigation/HistorySidebar';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
+import { SEO } from '../components/common/SEO';
 
 export const WorkspacePage: React.FC = () => {
   const location = useLocation();
@@ -176,6 +177,11 @@ export const WorkspacePage: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-slate-100/60">
+      <SEO
+        title={activeInvestigation ? `${activeInvestigation.title} — Diagnostic Workspace` : 'Diagnostic Troubleshooting Workspace — Zelqora'}
+        description="Interactive technical troubleshooting workspace: review ranked hypotheses, run safe diagnostic checks locally, and verify solutions."
+        canonicalPath="/troubleshoot"
+      />
       
       {/* Desktop History Sidebar */}
       <div className="hidden md:block w-80 shrink-0 border-r border-slate-200 bg-white">

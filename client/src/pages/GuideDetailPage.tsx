@@ -18,6 +18,7 @@ import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { CopyButton } from '../components/ui/CopyButton';
 import { Button } from '../components/ui/Button';
+import { SEO } from '../components/common/SEO';
 
 export const GuideDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -65,6 +66,23 @@ export const GuideDetailPage: React.FC = () => {
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <SEO
+        title={guide.title}
+        description={guide.summary}
+        canonicalPath={`/guides/${guide.slug}`}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'TechArticle',
+          headline: guide.title,
+          description: guide.summary,
+          author: {
+            '@type': 'Organization',
+            name: guide.author_name
+          },
+          dateModified: guide.last_reviewed_at,
+          articleSection: guide.category
+        }}
+      />
       
       {/* Back button */}
       <div>

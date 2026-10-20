@@ -2,18 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, 
-  Search, 
   Terminal, 
   ShieldCheck, 
   TrendingUp, 
   BookOpen, 
-  AlertCircle
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Cpu,
+  Layers,
+  RotateCcw
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { api } from '../services/api';
 import { Guide } from '../types';
+import { SEO } from '../components/common/SEO';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,49 +53,84 @@ export const HomePage: React.FC = () => {
       text: 'PostgreSQL rejects new application queries with "FATAL: remaining connection slots are reserved for non-replication superuser connections".'
     },
     {
-      label: 'Python ModuleNotFoundError',
-      text: 'Package is listed in pip list, but running python app.py throws "ModuleNotFoundError: No module named fastapi" in VS Code.'
+      label: 'Python ModuleNotFoundError on Windows',
+      text: 'Package is listed in pip list, but running python app.py throws "ModuleNotFoundError: No module named fastapi" in VS Code on Windows.'
     }
   ];
 
   const commonAreas = [
     {
       title: 'Docker & Containers',
-      description: 'Exit code 137 OOM kills, port mappings, cgroups, compose networking.',
-      slug: 'docker-exit-code-137-oomkilled'
+      description: 'Exit code 137 OOM kills, resource limits, bridge networking, and compose mounts.',
+      category: 'Docker & Deployment'
     },
     {
       title: 'Node.js & JavaScript',
-      description: 'Memory leaks, heap exhaustion, event loop lag, unhandled rejections.',
-      slug: 'nodejs-memory-leak-heap-exhaustion'
+      description: 'Heap memory exhaustion, unhandled promise rejections, event loop lag, and connection resets.',
+      category: 'Node.js'
     },
     {
       title: 'Python & Environments',
-      description: 'Virtual environment mismatches, pip path issues, dependency conflicts.',
-      slug: 'python-modulenotfounderror-virtualenv-vscode'
+      description: 'Virtual environment interpreter path conflicts, pip vs system package collisions, and Windows execution policies.',
+      category: 'Python & Tooling'
     },
     {
       title: 'HTTP APIs & CORS',
-      description: 'Cross-origin headers, preflight OPTIONS requests, authorization cookies.',
-      slug: 'resolving-cors-errors-react-express'
+      description: 'Missing preflight OPTIONS handling, credentialed cookie rejections, and reverse proxy timeouts.',
+      category: 'HTTP & APIs'
     },
     {
       title: 'PostgreSQL & Databases',
-      description: 'Connection pool saturation, idle-in-transaction locks, query timeouts.',
-      slug: 'postgresql-max-connections-exhausted'
+      description: 'Max connection slot exhaustion, uncommitted idle-in-transaction locks, and query timeouts.',
+      category: 'PostgreSQL & Databases'
     },
     {
       title: 'React & Frontend',
-      description: 'Hydration mismatches, state closures, infinite re-render loops.',
-      slug: 'resolving-cors-errors-react-express'
+      description: 'Hydration mismatches between SSR and browser mounts, stale state closures, and infinite render cascades.',
+      category: 'React & Frontend'
+    }
+  ];
+
+  const workflowSteps = [
+    {
+      number: '01',
+      title: 'Describe & Sanitize',
+      description: 'Provide your error message, command output, or symptom. Automated redaction algorithms filter tokens and credentials before processing.'
+    },
+    {
+      number: '02',
+      title: 'Ranked Hypotheses',
+      description: 'Review the most plausible causes ordered by evidence and likelihood, highlighting what details are still missing.'
+    },
+    {
+      number: '03',
+      title: 'Run Safe Local Checks',
+      description: 'Execute suggested read-only diagnostic commands on your machine and paste the output to update the diagnosis.'
+    },
+    {
+      number: '04',
+      title: 'Step-by-Step Fix',
+      description: 'Follow an ordered solution backed by official documentation, complete with rollback instructions if you need to undo changes.'
     }
   ];
 
   return (
-    <div className="space-y-16 sm:space-y-20 pb-20">
+    <div className="space-y-16 sm:space-y-24 pb-20">
+      <SEO
+        title="Zelqora — Solve Technical Problems with Clarity"
+        description="Describe your technical issue, investigate the likely cause, and work through a clear solution with guided diagnostic checks."
+        canonicalPath="/"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Zelqora',
+          url: 'https://zelqora.example.com',
+          description: 'Technical troubleshooting platform with adaptive diagnostic checks and verified documentation grounding.'
+        }}
+      />
       
       {/* Hero Section */}
-      <section className="pt-10 sm:pt-16 pb-6">
+      <section className="pt-10 sm:pt-16 pb-4">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
           
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
@@ -99,10 +139,10 @@ export const HomePage: React.FC = () => {
 
           <div className="space-y-3">
             <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Find the cause. Fix the problem. Get back to work.
+              Solve technical problems with clarity.
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
-              Describe what's going wrong with your code, website, API, database, or development environment. Zelqora helps you investigate the cause, run safe diagnostic checks, and work through a solution step by step.
+              Describe your technical issue, investigate the likely cause, and work through a clear solution with guided diagnostic checks.
             </p>
           </div>
 
@@ -130,7 +170,7 @@ export const HomePage: React.FC = () => {
                 </span>
 
                 <Button type="submit" size="md" variant="primary" className="w-full sm:w-auto shrink-0">
-                  Diagnose a Problem
+                  Diagnose My Problem
                 </Button>
               </div>
             </form>
@@ -139,7 +179,7 @@ export const HomePage: React.FC = () => {
           {/* Example Problems (Clearly Identified as Examples) */}
           <div className="max-w-2xl mx-auto text-left space-y-2 pt-2">
             <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              Sample Problem Starters (click to try an example):
+              Sample Problem Starters (click to test an example):
             </div>
             <div className="flex flex-wrap gap-2">
               {exampleStarters.map((ex, idx) => (
@@ -149,7 +189,7 @@ export const HomePage: React.FC = () => {
                   onClick={() => setProblemDescription(ex.text)}
                   className="text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:border-blue-300 text-slate-700 transition-colors text-left"
                 >
-                  <span className="text-slate-400 mr-1.5 font-mono text-[10px]">Example:</span>
+                  <span className="text-blue-600 font-semibold mr-1.5 font-mono text-[10px]">Example:</span>
                   <span className="font-medium text-slate-900">{ex.label}</span>
                 </button>
               ))}
@@ -159,40 +199,110 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3 Core Workflow Principles (Clean, Helpful) */}
+      {/* How Troubleshooting Works */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="text-center space-y-2 max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            How Troubleshooting Works on Zelqora
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            A systematic, safe approach modeled after real systems engineering investigation.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {workflowSteps.map(step => (
+            <div 
+              key={step.number}
+              className="p-5 rounded-xl border border-slate-200 bg-white space-y-3 relative shadow-2xs flex flex-col justify-between"
+            >
+              <div className="space-y-2">
+                <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                  {step.number}
+                </span>
+                <h3 className="text-sm font-bold text-slate-900">
+                  {step.title}
+                </h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* What Zelqora Can and Cannot Do (Honest Operational Scope) */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2.5 shadow-2xs">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900">Ranked by Evidence</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Instead of giving one guess, Zelqora analyzes your environment to rank the most probable causes by likelihood, updating the ranking as you provide more details.
+        <div className="p-6 sm:p-8 rounded-2xl border border-slate-200 bg-white space-y-6 shadow-xs">
+          <div className="text-left space-y-1 border-b border-slate-100 pb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              What Zelqora Can and Cannot Do
+            </h2>
+            <p className="text-xs text-slate-500">
+              Clear expectations build reliable engineering trust. Here is how our diagnostic platform operates.
             </p>
           </div>
 
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2.5 shadow-2xs">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
-              <ShieldCheck className="w-4 h-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            
+            {/* What it Can Do */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span>What Zelqora Does</span>
+              </div>
+              <ul className="space-y-2 text-xs text-slate-700 leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>Ranks probable causes:</strong> Evaluates your symptoms against known failure modes and ranks hypotheses by supporting evidence.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>Suggests safe diagnostic checks:</strong> Provides non-destructive inspection commands for you to run in your terminal.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>Adapts to your test results:</strong> Updates probabilities and eliminates ruled-out hypotheses when you submit command outputs.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>References official documentation:</strong> Grounded in verified documentation from Docker, Node.js, Python, PostgreSQL, and React.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>Provides rollback guidance:</strong> Explains how to safely revert changes if a suggested fix does not resolve the issue.</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="text-base font-bold text-slate-900">Safe Checks You Run</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              We suggest read-only inspection commands for you to run locally. You review each command, run it yourself, and submit the output to confirm the diagnosis.
-            </p>
-          </div>
 
-          <div className="p-6 rounded-xl border border-slate-200 bg-white space-y-2.5 shadow-2xs">
-            <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-              <BookOpen className="w-4 h-4" />
+            {/* What it Cannot Do */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-rose-700 font-bold text-sm">
+                <XCircle className="w-5 h-5 text-rose-600" />
+                <span>What Zelqora Does Not Do</span>
+              </div>
+              <ul className="space-y-2 text-xs text-slate-700 leading-relaxed">
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>Zero remote execution:</strong> We never run code, commands, or scripts on your computer or servers. You inspect and execute everything yourself.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>No credential storage:</strong> We never ask for passwords, private keys, or API credentials. Automated filters scrub them before analysis.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>No universal guarantee:</strong> We cannot promise every software defect can be resolved, especially intermittent hardware faults or closed-source proprietary bugs.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-rose-500 font-bold mt-0.5">&bull;</span>
+                  <span><strong>No fabricated answers:</strong> If live AI analysis is unavailable, we use transparent offline diagnostic pattern matching and inform you honestly.</span>
+                </li>
+              </ul>
             </div>
-            <h3 className="text-base font-bold text-slate-900">Official Documentation</h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Every diagnosis references official manuals—Node.js, Docker, PostgreSQL, React, and Python—so you can verify the recommendations against trusted sources.
-            </p>
-          </div>
 
+          </div>
         </div>
       </section>
 
@@ -200,10 +310,10 @@ export const HomePage: React.FC = () => {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="text-left space-y-1">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Common Technical Categories
+            Supported Problem Domains
           </h2>
           <p className="text-xs text-slate-500">
-            Select a technical area or start a custom diagnostic session above.
+            Explore frequent failure categories or begin an investigation with your specific error message.
           </p>
         </div>
 
@@ -226,20 +336,20 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Reviewed Troubleshooting Guides */}
+      {/* Practical Troubleshooting Guides */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Tested Troubleshooting Guides
+              Practical Troubleshooting Guides
             </h2>
             <p className="text-xs text-slate-500">
-              Detailed walkthroughs for recurring software and deployment issues.
+              In-depth, tested walkthroughs for common developer errors and infrastructure failures.
             </p>
           </div>
           <Link to="/guides">
             <Button size="sm" variant="outline" icon={<ArrowRight className="w-3.5 h-3.5" />}>
-              All Guides
+              Browse All Guides
             </Button>
           </Link>
         </div>
@@ -276,17 +386,17 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Simple Bottom CTA */}
+      {/* Clear Bottom CTA */}
       <section className="max-w-3xl mx-auto px-4 text-center space-y-4 pt-4">
         <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Have an active error in front of you?
+          Facing a technical bug or crash right now?
         </h2>
         <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto">
           Start a diagnostic session now. Describe what happened, run safe checks, and work toward a verified fix.
         </p>
         <Link to="/troubleshoot">
           <Button size="md" variant="primary">
-            Diagnose a Problem Now
+            Diagnose My Problem
           </Button>
         </Link>
       </section>
