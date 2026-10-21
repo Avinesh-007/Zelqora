@@ -133,4 +133,36 @@ describe('Zelqora API Integration Tests', () => {
 
     expect(accessRes.status).toBe(403);
   });
+
+  it('POST /api/contact saves inquiry with validation and redaction', async () => {
+    const res = await request(app)
+      .post('/api/contact')
+      .send({
+        name: 'Jordan Tech',
+        email: 'jordan@example.com',
+        subject: 'Guide correction for Docker 137',
+        message: 'Here is my API key sk-live-1234567890abcdef1234567890abcdef and feedback.'
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+
+    // Verify bad email returns 400
+    const badRes = await request(app)
+      .post('/api/contact')
+      .send({
+        name: 'Jordan',
+        email: 'not-an-email',
+        subject: 'Test',
+        message: 'Short message'
+      });
+    expect(badRes.status).toBe(400);
+  });
+
+  it('GET /api/guides/:slug returns new SQLite locking guide', async () => {
+    const res = await request(app).get('/api/guides/sqlite-database-is-locked-busy');
+    expect(res.status).toBe(200);
+    expect(res.body.guide.title).toContain('SQLITE_BUSY');
+    expect(res.body.guide.verified_solutions.length).toBeGreaterThan(0);
+  });
 });

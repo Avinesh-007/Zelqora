@@ -16,6 +16,7 @@ import investigationRoutes from './routes/investigation.routes.js';
 import guideRoutes from './routes/guide.routes.js';
 import documentationRoutes from './routes/documentation.routes.js';
 import seoRoutes from './routes/seo.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 import { authMiddleware } from './middleware/auth.middleware.js';
 import { csrfProtection, apiRateLimiter } from './middleware/security.middleware.js';
@@ -66,6 +67,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/investigations', investigationRoutes);
 app.use('/api/guides', guideRoutes);
 app.use('/api/documentation', documentationRoutes);
+app.use('/api/contact', contactRoutes);
 
 // In production, serve the built Vite client static assets
 const clientDistPath = path.resolve(process.cwd(), 'dist');

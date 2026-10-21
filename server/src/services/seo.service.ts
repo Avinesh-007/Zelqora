@@ -6,8 +6,11 @@ export class SeoService {
    * Generates a valid XML sitemap containing only eligible public pages and published guides.
    * Excludes all private user investigations, authentication routes, and internal APIs.
    */
-  public static generateSitemapXml(): string {
-    const baseUrl = ENV.APP_URL.replace(/\/+$/, '');
+  public static generateSitemapXml(requestBaseUrl?: string): string {
+    const defaultUrl = ENV.APP_URL && !ENV.APP_URL.includes('localhost')
+      ? ENV.APP_URL.replace(/\/+$/, '')
+      : (requestBaseUrl ? requestBaseUrl.replace(/\/+$/, '') : 'https://zelqora.onrender.com');
+    const baseUrl = defaultUrl;
     const now = new Date().toISOString().split('T')[0];
 
     // Static public pages
@@ -61,8 +64,11 @@ export class SeoService {
   /**
    * Generates robots.txt rules protecting private paths while allowing public SEO crawling.
    */
-  public static generateRobotsTxt(): string {
-    const baseUrl = ENV.APP_URL.replace(/\/+$/, '');
+  public static generateRobotsTxt(requestBaseUrl?: string): string {
+    const defaultUrl = ENV.APP_URL && !ENV.APP_URL.includes('localhost')
+      ? ENV.APP_URL.replace(/\/+$/, '')
+      : (requestBaseUrl ? requestBaseUrl.replace(/\/+$/, '') : 'https://zelqora.onrender.com');
+    const baseUrl = defaultUrl;
     return `# Zelqora Search Engine Robot Policy
 User-agent: *
 Allow: /

@@ -521,17 +521,218 @@ export function ClientOnlyTimestamp() {
     status: 'published',
     author_name: 'Zelqora Frontend Team',
     last_reviewed_at: '2026-04-01T00:00:00.000Z'
+  },
+  {
+    slug: 'sqlite-database-is-locked-busy',
+    title: 'Troubleshooting SQLite "Database is Locked" (SQLITE_BUSY) in Node.js & Multi-Process Apps',
+    summary: 'Diagnose and resolve SQLITE_BUSY (error code 5) and SQLITE_LOCKED errors caused by concurrent write transactions, unfinalized statements, or missing WAL mode in Node.js applications.',
+    category: 'Databases & Storage',
+    symptoms: [
+      'Application throws "SqliteError: database is locked" or "SQLITE_BUSY: database is locked" during concurrent write operations.',
+      'API write requests fail intermittently under modest request traffic or parallel background tasks.',
+      'Database connection hangs or throws timeout errors when multiple worker threads or processes access the same SQLite database file.'
+    ],
+    environment_prereqs: [
+      'Node.js 18+ runtime with SQLite drivers (better-sqlite3, sqlite3, or Prisma with SQLite provider)',
+      'Local disk filesystem (avoid network filesystems like NFS or SMB where file locking protocols are unreliable)'
+    ],
+    likely_causes: [
+      {
+        cause: 'Default Journal Mode (DELETE) Blocking Concurrent Reads and Writes',
+        explanation: 'In SQLite\'s default rollback journal mode, writing locks the entire database file exclusively, preventing both other writers and readers. When a second transaction attempts to write before the lock releases, SQLite raises SQLITE_BUSY.'
+      },
+      {
+        cause: 'Missing Busy Timeout Setting',
+        explanation: 'By default, many SQLite drivers fail immediately with SQLITE_BUSY if a lock cannot be obtained in 0 milliseconds instead of waiting for brief in-flight transactions to conclude.'
+      },
+      {
+        cause: 'Multiple Database Connection Instances per Process',
+        explanation: 'Opening multiple separate connection handles to the same database file within a single Node.js process bypasses internal driver serialization and triggers intra-process lock conflicts.'
+      }
+    ],
+    diagnostic_steps: [
+      {
+        step: 'Check current SQLite journal mode',
+        command: 'sqlite3 app.db "PRAGMA journal_mode;"',
+        interpretation: 'If the output is "delete", "truncate", or "persist", WAL mode is disabled and exclusive whole-database locking is active.'
+      },
+      {
+        step: 'Verify current busy timeout configuration',
+        command: 'sqlite3 app.db "PRAGMA busy_timeout;"',
+        interpretation: 'If the result is 0, the driver does not wait for existing lock holders to finish and errors instantly on contention.'
+      },
+      {
+        step: 'Inspect active file locks and processes accessing the database file',
+        command: 'lsof app.db (on Linux/macOS) or handle.exe app.db (on Windows)',
+        interpretation: 'Reveals all distinct process IDs holding open handles or locks on the SQLite file.'
+      }
+    ],
+    verified_solutions: [
+      {
+        title: 'Enable Write-Ahead Logging (WAL) and Configure Busy Timeout',
+        steps: [
+          'Switch journal mode to WAL: allows readers and one writer to work concurrently without blocking each other.',
+          'Configure a busy timeout of 5000 milliseconds so brief write transactions wait for lock clearance.'
+        ],
+        code_snippet: `import Database from 'better-sqlite3';
+
+const db = new Database('app.db', { timeout: 5000 });
+
+// Enable Write-Ahead Logging for concurrent read/write throughput
+db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('synchronous = NORMAL');`,
+        language: 'typescript',
+        rollback: "Revert journal mode using db.pragma('journal_mode = DELETE');"
+      },
+      {
+        title: 'Enforce Singleton Database Connection Pattern',
+        steps: [
+          'Export a single cached database instance module across your entire application instead of creating new Database() instances per route or request.',
+          'Wrap write operations in transaction blocks that execute synchronously to avoid interleaving async queries.'
+        ],
+        code_snippet: `// db/database.ts
+import Database from 'better-sqlite3';
+
+let instance: Database.Database | null = null;
+
+export function getDatabase(): Database.Database {
+  if (!instance) {
+    instance = new Database('data/app.db', { timeout: 5000 });
+    instance.pragma('journal_mode = WAL');
+  }
+  return instance;
+}`,
+        language: 'typescript'
+      }
+    ],
+    warnings: [
+      'Never place SQLite database files on network-attached storage (NFS, SMB, CIFS, or Google Drive) because remote POSIX advisory file locking is buggy and leads to persistent lock deadlocks and corruption.',
+      'Do not set synchronous = OFF in production environments, as power failure or unexpected crashes can corrupt uncheckpointed transactions.'
+    ],
+    documentation_references: [
+      {
+        title: 'SQLite Official Documentation: Write-Ahead Logging (WAL)',
+        url: 'https://www.sqlite.org/wal.html',
+        source_name: 'SQLite Official Documentation',
+        relevant_excerpt: 'WAL provides more concurrency as readers do not block writers and a writer does not block readers. Reading and writing can proceed concurrently.',
+        verified: true
+      },
+      {
+        title: 'SQLite Official Documentation: PRAGMA busy_timeout',
+        url: 'https://www.sqlite.org/pragma.html#pragma_busy_timeout',
+        source_name: 'SQLite Official Documentation',
+        relevant_excerpt: 'Query or set the busy timeout. When the timeout is non-zero, SQLite will sleep and retry before returning SQLITE_BUSY.',
+        verified: true
+      }
+    ],
+    status: 'published',
+    author_name: 'Zelqora Database & Systems Team',
+    last_reviewed_at: '2026-04-10T00:00:00.000Z'
+  },
+  {
+    slug: 'docker-port-already-allocated-eaddrinuse',
+    title: 'Resolving "Port Is Already Allocated" & EADDRINUSE in Docker and Node.js Development',
+    summary: 'Identify and resolve TCP port collision errors such as "bind: address already in use" and Node.js EADDRINUSE on Windows, macOS, and Linux development environments.',
+    category: 'Docker & Networking',
+    symptoms: [
+      'Docker run or docker compose up fails with: "Error response from daemon: driver failed programming external connectivity on endpoint: Bind for 0.0.0.0:3000 failed: port is already allocated".',
+      'Node.js or Express service crashes on startup with: "Error: listen EADDRINUSE: address already in use :::3000".',
+      'The developer closed their IDE or terminal, but the port remains occupied by an orphaned background process.'
+    ],
+    environment_prereqs: [
+      'Docker Desktop 4.x+ or Docker Engine with Docker Compose v2',
+      'Local development machine running Windows 11, macOS, or Linux',
+      'Node.js development server (Vite, Next.js, Express, Fastify)'
+    ],
+    likely_causes: [
+      {
+        cause: 'Orphaned Background Process or Zombie Node.js Process',
+        explanation: 'A previous development session crashed or was stopped with CTRL+Z instead of CTRL+C, leaving the server process running in the background and holding the socket open.'
+      },
+      {
+        cause: 'Existing Stopped Docker Container Still Holding Port Binding',
+        explanation: 'A previously started Docker container with host port mapping (-p 3000:3000) was stopped without removing the container or is running under a different Compose project name.'
+      },
+      {
+        cause: 'Windows Hyper-V or WSL2 Dynamic Port Reservation',
+        explanation: 'On Windows, Hyper-V/WSL2 reserves dynamic TCP port ranges at boot. If your target port falls within an excluded port range, Windows blocks applications from binding to that port.'
+      }
+    ],
+    diagnostic_steps: [
+      {
+        step: 'Find the process occupying the port on Windows PowerShell',
+        command: 'Get-Process -Id (Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue).OwningProcess',
+        interpretation: 'Returns the exact Process ID (PID) and Process Name (e.g. node.exe, docker-proxy.exe) listening on port 3000.'
+      },
+      {
+        step: 'Find the process occupying the port on Linux or macOS',
+        command: 'lsof -nP -iTCP:3000 -sTCP:LISTEN',
+        interpretation: 'Prints the command name, PID, user, and file descriptor of the process listening on port 3000.'
+      },
+      {
+        step: 'Check for Docker containers published on the port',
+        command: 'docker ps -a --filter "publish=3000"',
+        interpretation: 'Lists any running or exited containers reserving port 3000 on the host.'
+      }
+    ],
+    verified_solutions: [
+      {
+        title: 'Terminate the Occupying Process Safely',
+        steps: [
+          'Identify the PID using the diagnostic step above.',
+          'Gracefully stop the process using taskkill (Windows) or kill (Linux/macOS).'
+        ],
+        code_snippet: `# On Windows PowerShell:
+Stop-Process -Id <PID> -Force
+
+# On Linux or macOS:
+kill -15 <PID>
+# If unresponsive:
+kill -9 <PID>`,
+        language: 'bash',
+        rollback: 'Restart the desired service using npm run dev.'
+      },
+      {
+        title: 'Stop Conflicting Docker Containers and Prune Orphan Networks',
+        steps: [
+          'Stop the conflicting container and remove orphan compose resources.',
+          'Restart your compose stack cleanly.'
+        ],
+        code_snippet: `docker compose down --remove-orphans
+docker ps --filter "publish=3000" -q | xargs -r docker stop`,
+        language: 'bash'
+      }
+    ],
+    warnings: [
+      'Do not blindly terminate system processes like svchost.exe or System (PID 4) on Windows without verifying what service is bound to the port.',
+      'Avoid running multiple development servers on default ports (e.g., 3000, 8080) simultaneously; configure distinct PORT environment variables in your .env file.'
+    ],
+    documentation_references: [
+      {
+        title: 'Node.js System Error Codes: EADDRINUSE',
+        url: 'https://nodejs.org/api/errors.html#errors_common_system_errors',
+        source_name: 'Node.js Official Documentation',
+        relevant_excerpt: 'EADDRINUSE (Address already in use): An attempt to bind a server to a local address that is already in use by another process.',
+        verified: true
+      },
+      {
+        title: 'Docker Documentation: Container Networking and Port Publishing',
+        url: 'https://docs.docker.com/engine/network/#published-ports',
+        source_name: 'Docker Official Documentation',
+        relevant_excerpt: 'By default, when you create or run a container using docker create or docker run, it does not publish any of its ports to the outside world. If you map a host port that is already in use, Docker returns an address allocation error.',
+        verified: true
+      }
+    ],
+    status: 'published',
+    author_name: 'Zelqora DevOps & Infrastructure Team',
+    last_reviewed_at: '2026-04-10T00:00:00.000Z'
   }
 ];
 
 export function seedGuides(db: Database.Database): void {
-  const count = db.prepare('SELECT count(*) as count FROM guides').get() as { count: number };
-  if (count.count > 0) {
-    return;
-  }
-
   const insert = db.prepare(`
-    INSERT INTO guides (
+    INSERT OR IGNORE INTO guides (
       id, slug, title, summary, category, symptoms, environment_prereqs,
       likely_causes, diagnostic_steps, verified_solutions, warnings,
       documentation_references, status, author_name, last_reviewed_at,

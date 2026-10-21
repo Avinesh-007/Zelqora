@@ -1,27 +1,49 @@
 import React, { useState } from 'react';
-import { Mail, MessageSquare, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, MessageSquare, Send, CheckCircle2, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input, Textarea } from '../components/ui/Input';
 import { SEO } from '../components/common/SEO';
+import { api } from '../services/api';
 
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError(null);
+    setLoading(true);
+
+    try {
+      await api.submitContact({
+        name,
+        email,
+        subject,
+        message
+      });
+      setSubmitted(true);
+      setName('');
+      setEmail('');
+      setSubject('');
+      setMessage('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send inquiry. Please try again or submit an issue on GitHub.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       <SEO
         title="Contact Zelqora Engineering & Issue Reporting"
-        description="Get in touch with the Zelqora technical team to report an issue, suggest a guide correction, or propose documentation sources."
+        description="Get in touch with the Zelqora technical team to report an issue, suggest a guide correction, or submit technical feedback."
         canonicalPath="/contact"
       />
       
@@ -44,23 +66,31 @@ export const ContactPage: React.FC = () => {
           <Card padding="md" className="border-slate-200 bg-white space-y-4">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <Mail className="w-4 h-4 text-blue-600" />
-              <span>Direct Channels</span>
+              <span>Channels & Repositories</span>
             </h3>
 
             <div className="space-y-3 text-xs">
               <div>
-                <span className="text-slate-400 font-medium block">Technical Inquiries:</span>
-                <span className="font-mono text-slate-800">support@zelqora.example.com</span>
+                <span className="text-slate-400 font-medium block">Project Maintainer:</span>
+                <span className="font-semibold text-slate-800">Avinesh & Open Source Contributors</span>
               </div>
 
               <div>
-                <span className="text-slate-400 font-medium block">Editorial Corrections:</span>
-                <span className="font-mono text-slate-800">editorial@zelqora.example.com</span>
+                <span className="text-slate-400 font-medium block">Public Issue Tracker:</span>
+                <a
+                  href="https://github.com/Avinesh-007/Zelqora/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 font-mono text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  <span>github.com/Avinesh-007/Zelqora</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
 
               <div>
-                <span className="text-slate-400 font-medium block">Security & Disclosure:</span>
-                <span className="font-mono text-slate-800">security@zelqora.example.com</span>
+                <span className="text-slate-400 font-medium block">Direct Web Inquiries:</span>
+                <span className="text-slate-700">Submit directly using the secure message form on this page.</span>
               </div>
             </div>
           </Card>
@@ -68,10 +98,10 @@ export const ContactPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
             <div className="flex items-center gap-1.5 font-bold text-slate-800">
               <AlertCircle className="w-4 h-4 text-blue-600" />
-              <span>Honest Operational Notice</span>
+              <span>Operational Notice</span>
             </div>
             <p className="text-[11px] leading-relaxed text-slate-500">
-              Zelqora is operated by an independent engineering team. We do not maintain a physical customer walk-in center or phone call center. All inquiries receive responses via email.
+              Zelqora is an open-source technical troubleshooting platform. Direct inquiries submitted through this form are logged in our internal system and reviewed by project maintainers. Sensitive tokens or passwords included in messages are automatically redacted before storage.
             </p>
           </div>
         </div>
@@ -84,7 +114,7 @@ export const ContactPage: React.FC = () => {
                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
                 <h3 className="text-base font-bold text-slate-900">Message Received</h3>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto">
-                  Thank you for contacting Zelqora Engineering. Your message has been routed to our technical reviewers.
+                  Thank you for contacting Zelqora Engineering. Your inquiry has been recorded and will be reviewed by our maintainers.
                 </p>
                 <Button size="sm" variant="outline" onClick={() => setSubmitted(false)}>
                   Send Another Message
@@ -92,6 +122,13 @@ export const ContactPage: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-700 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="Your Name"
@@ -128,8 +165,14 @@ export const ContactPage: React.FC = () => {
                 />
 
                 <div className="flex justify-end pt-2">
-                  <Button type="submit" size="md" variant="primary" icon={<Send className="w-4 h-4" />}>
-                    Send Inquiry
+                  <Button
+                    type="submit"
+                    size="md"
+                    variant="primary"
+                    disabled={loading}
+                    icon={loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  >
+                    {loading ? 'Sending...' : 'Send Inquiry'}
                   </Button>
                 </div>
               </form>

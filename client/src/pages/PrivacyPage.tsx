@@ -85,23 +85,39 @@ export const PrivacyPage: React.FC = () => {
 
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">
-            5. Cookies & Local Storage
+            5. Cookies & Local Storage Technologies
           </h2>
           <p>
-            Zelqora uses essential <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">HttpOnly</code>, <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">SameSite=Lax</code> cookies exclusively to maintain secure authentication sessions. We also store a random anonymous guest token in your browser's local storage so you can refresh or return to your active troubleshooting investigations without losing progress. We do not use third-party tracking cookies, cross-site trackers, or social media beacons.
+            Zelqora uses essential <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">HttpOnly</code>, <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">SameSite=Lax</code> cookies exclusively to maintain secure authentication sessions. We also store a random anonymous guest token in your browser's local storage so you can refresh or return to your active troubleshooting investigations without losing progress.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">
-            6. Data Retention & Your Deletion Rights
+            6. Third-Party Vendors & Advertising Disclosures
           </h2>
           <p>
-            You have full control over your data:
+            We may partner with third-party vendors, including Google, to serve relevant advertisements across the website to support platform operations:
+          </p>
+          <ul className="list-disc list-inside space-y-1.5 text-xs text-slate-600 pl-2">
+            <li>Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website or other websites on the Internet.</li>
+            <li>Google's use of advertising cookies enables it and its partners to serve ads to users based on their visits to Zelqora and other sites on the Internet.</li>
+            <li>Users may opt out of personalized advertising at any time by visiting <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">Google Ads Settings</a>.</li>
+            <li>Alternatively, users can opt out of third-party vendor cookies for personalized advertising by visiting the <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">Network Advertising Initiative / AboutAds Opt-Out Page</a>.</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">
+            7. Data Retention & User Deletion Rights (GDPR & CCPA)
+          </h2>
+          <p>
+            You retain full rights and control over your data:
           </p>
           <ul className="list-disc list-inside space-y-1 text-xs text-slate-600 pl-2">
             <li>You can delete individual investigations at any time directly from the Workspace History panel.</li>
-            <li>You can request complete account and data deletion by contacting <span className="font-mono text-slate-800">security@zelqora.example.com</span>.</li>
+            <li>You can export or request complete account and data deletion at any time by submitting a request through our <a href="/contact" className="text-blue-600 hover:underline font-medium">Contact Form</a>.</li>
+            <li>We do not sell, rent, or trade your personal information or technical troubleshooting input to data brokers.</li>
           </ul>
         </section>
 

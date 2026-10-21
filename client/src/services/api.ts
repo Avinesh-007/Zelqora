@@ -143,5 +143,12 @@ export const api = {
     request<{ sources: DocSource[] }>('/documentation/sources'),
 
   searchDocs: (q: string, category?: string) => 
-    request<{ results: any[] }>(`/documentation/search?q=${encodeURIComponent(q)}${category ? `&category=${encodeURIComponent(category)}` : ''}`)
+    request<{ results: any[] }>(`/documentation/search?q=${encodeURIComponent(q)}${category ? `&category=${encodeURIComponent(category)}` : ''}`),
+
+  // Inquiries & Feedback
+  submitContact: (data: { name: string; email: string; subject: string; message: string }) =>
+    request<{ success: boolean; message: string }>('/contact', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
 };

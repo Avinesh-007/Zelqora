@@ -85,5 +85,20 @@ export const MIGRATIONS = [
       CREATE INDEX IF NOT EXISTS idx_guides_status ON guides(status);
       CREATE INDEX IF NOT EXISTS idx_guides_category ON guides(category);
     `
+  },
+  {
+    version: 2,
+    name: 'create_inquiries_table',
+    up: `
+      CREATE TABLE IF NOT EXISTS inquiries (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        message TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_inquiries_created_at ON inquiries(created_at);
+    `
   }
 ];
