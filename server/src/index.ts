@@ -24,6 +24,9 @@ import { errorHandler } from './middleware/error.middleware.js';
 
 const app = express();
 
+// Trust reverse proxy (Render, Cloudflare) for accurate headers and protocols
+app.set('trust proxy', 1);
+
 // Initialize database and seed initial verified guides
 const db = getDatabase();
 seedGuides(db);
@@ -76,7 +79,12 @@ if (fs.existsSync(clientDistPath)) {
 
   // SPA fallback for frontend client routing (Express 5 compatible)
   app.use((req, res, next) => {
-    if (req.path.startsWith('/api') || req.path === '/sitemap.xml' || req.path === '/robots.txt') {
+    if (
+      req.path.startsWith('/api') ||
+      req.path.includes('sitemap') ||
+      req.path.startsWith('/robots.txt') ||
+      req.path.startsWith('/google')
+    ) {
       return next();
     }
     res.sendFile(path.join(clientDistPath, 'index.html'));

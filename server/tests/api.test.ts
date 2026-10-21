@@ -18,22 +18,55 @@ describe('Zelqora API Integration Tests', () => {
     expect(res.body.ai_engine.provider).toBe('Google Gemini');
   });
 
-  it('GET /sitemap.xml returns valid XML sitemap including published guides', async () => {
+  it('GET /sitemap.xml returns valid XML sitemap with compliant headers and canonical origin', async () => {
     const res = await request(app).get('/sitemap.xml');
     expect(res.status).toBe(200);
-    expect(res.header['content-type']).toContain('xml');
-    expect(res.text).toContain('<urlset');
+    expect(res.header['content-type']).toContain('application/xml');
+    expect(res.header['cache-control']).toContain('public');
+    expect(res.header['x-robots-tag']).toBe('noindex');
+    expect(res.header['access-control-allow-origin']).toBe('*');
+    expect(res.text).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(res.text).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(res.text).toContain('<loc>https://zelqora.onrender.com/</loc>');
     expect(res.text).toContain('/guides/docker-exit-code-137-oomkilled');
     expect(res.text).not.toContain('/api/');
     expect(res.text).not.toContain('/investigations/');
+    expect(res.text).not.toContain('http://localhost');
+  });
+
+  it('HEAD /sitemap.xml returns 200 with matching headers', async () => {
+    const res = await request(app).head('/sitemap.xml');
+    expect(res.status).toBe(200);
+    expect(res.header['content-type']).toContain('application/xml');
+    expect(res.header['cache-control']).toContain('public');
+  });
+
+  it('GET /sitemap_index.xml and /sitemap.xml/ resolve identically to valid XML', async () => {
+    const indexRes = await request(app).get('/sitemap_index.xml');
+    expect(indexRes.status).toBe(200);
+    expect(indexRes.header['content-type']).toContain('application/xml');
+    expect(indexRes.text).toContain('<urlset');
+
+    const slashRes = await request(app).get('/sitemap.xml/');
+    expect(slashRes.status).toBe(200);
+    expect(slashRes.header['content-type']).toContain('application/xml');
+    expect(slashRes.text).toContain('<urlset');
+  });
+
+  it('Redirects accidental nested search console path (*sitemap.xml) to /sitemap.xml', async () => {
+    const res = await request(app).get('/https://zelqora.onrender.com/sitemap.xml');
+    expect(res.status).toBe(301);
+    expect(res.header.location).toBe('/sitemap.xml');
   });
 
   it('GET /robots.txt returns valid robot rules disallowing private paths', async () => {
     const res = await request(app).get('/robots.txt');
     expect(res.status).toBe(200);
+    expect(res.header['content-type']).toContain('text/plain');
+    expect(res.header['cache-control']).toContain('public');
     expect(res.text).toContain('Disallow: /api/');
     expect(res.text).toContain('Disallow: /investigations/');
-    expect(res.text).toContain('Sitemap:');
+    expect(res.text).toContain('Sitemap: https://zelqora.onrender.com/sitemap.xml');
   });
 
   it('GET /api/guides returns published guides only', async () => {

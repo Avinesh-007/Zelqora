@@ -1,0 +1,19 @@
+# Zelqora Search Engine Robot Policy
+User-agent: *
+Allow: /
+Allow: /guides/
+Allow: /docs/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /methodology
+Allow: /editorial-policy
+
+# Disallow private user sessions, diagnostics, auth, and API endpoints
+Disallow: /api/
+Disallow: /investigations/
+Disallow: /editorial/
+Disallow: /auth/
+
+Sitemap: https://zelqora.onrender.com/sitemap.xml
