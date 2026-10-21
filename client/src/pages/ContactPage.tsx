@@ -66,10 +66,21 @@ export const ContactPage: React.FC = () => {
           <Card padding="md" className="border-slate-200 bg-white space-y-4">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <Mail className="w-4 h-4 text-blue-600" />
-              <span>Channels & Repositories</span>
+              <span>Get in Touch</span>
             </h3>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <span className="text-slate-400 font-medium block mb-1">Official Contact Email:</span>
+                <a
+                  href="mailto:aviavinesh1785@gmail.com"
+                  className="font-mono text-blue-600 hover:text-blue-800 hover:underline font-semibold break-all inline-flex items-center gap-1.5 text-[13px]"
+                >
+                  <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>aviavinesh1785@gmail.com</span>
+                </a>
+              </div>
+
               <div>
                 <span className="text-slate-400 font-medium block">Project Maintainer:</span>
                 <span className="font-semibold text-slate-800">Avinesh & Open Source Contributors</span>
@@ -101,7 +112,7 @@ export const ContactPage: React.FC = () => {
               <span>Operational Notice</span>
             </div>
             <p className="text-[11px] leading-relaxed text-slate-500">
-              Zelqora is an open-source technical troubleshooting platform. Direct inquiries submitted through this form are logged in our internal system and reviewed by project maintainers. Sensitive tokens or passwords included in messages are automatically redacted before storage.
+              Zelqora is an open-source technical troubleshooting platform. Direct inquiries submitted through this form are logged in our internal system and reviewed by project maintainers. If you prefer to write to us directly, you can email <a href="mailto:aviavinesh1785@gmail.com" className="text-blue-600 hover:underline font-medium">aviavinesh1785@gmail.com</a>. Sensitive tokens or passwords included in messages are automatically redacted before storage.
             </p>
           </div>
         </div>

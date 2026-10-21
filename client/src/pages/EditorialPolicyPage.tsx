@@ -73,7 +73,7 @@ export const EditorialPolicyPage: React.FC = () => {
             <span>3. Submitting Corrections & Feedback</span>
           </h2>
           <p>
-            If you identify a technical inaccuracy, broken command, or outdated flag in any published Zelqora guide, please notify our editorial staff at <span className="font-mono text-slate-800">editorial@zelqora.example.com</span>. We review and verify all reported corrections against official source releases within 3 business days.
+            If you identify a technical inaccuracy, broken command, or outdated flag in any published Zelqora guide, please notify our editorial maintainer at <a href="mailto:aviavinesh1785@gmail.com" className="font-mono text-blue-600 hover:underline font-medium">aviavinesh1785@gmail.com</a> or submit a message through our <a href="/contact" className="text-blue-600 hover:underline font-medium">Contact Form</a>. We review and verify all reported corrections against official source releases.
           </p>
         </section>
 

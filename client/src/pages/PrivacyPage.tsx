@@ -116,7 +116,7 @@ export const PrivacyPage: React.FC = () => {
           </p>
           <ul className="list-disc list-inside space-y-1 text-xs text-slate-600 pl-2">
             <li>You can delete individual investigations at any time directly from the Workspace History panel.</li>
-            <li>You can export or request complete account and data deletion at any time by submitting a request through our <a href="/contact" className="text-blue-600 hover:underline font-medium">Contact Form</a>.</li>
+            <li>You can export or request complete account and data deletion at any time by submitting a request through our <a href="/contact" className="text-blue-600 hover:underline font-medium">Contact Form</a> or by emailing our official contact at <a href="mailto:aviavinesh1785@gmail.com" className="text-blue-600 hover:underline font-medium">aviavinesh1785@gmail.com</a>.</li>
             <li>We do not sell, rent, or trade your personal information or technical troubleshooting input to data brokers.</li>
           </ul>
         </section>
