@@ -8,7 +8,18 @@ export class GeminiService {
   private static aiClient: GoogleGenAI | null = null;
 
   public static isConfigured(): boolean {
-    return Boolean(ENV.GEMINI_API_KEY && ENV.GEMINI_API_KEY.trim().length > 0);
+    const key = ENV.GEMINI_API_KEY?.trim();
+    if (!key) return false;
+    if (
+      key === 'your_gemini_api_key_here' || 
+      key === '""' || 
+      key === "''" || 
+      key.includes('placeholder') || 
+      key.length < 10
+    ) {
+      return false;
+    }
+    return true;
   }
 
   private static getClient(): GoogleGenAI {
@@ -62,8 +73,8 @@ export class GeminiService {
         });
         return { assessment, mode: 'gemini_live' };
       } catch (err: any) {
-        console.error('Gemini API call failed:', err?.message || err);
-        throw new Error(`Gemini diagnostic engine error: ${err?.message || 'External model provider failure'}`);
+        console.warn('Live Gemini API call failed, falling back to local diagnostic engine:', err?.message || err);
+        // Gracefully fall through to local deterministic diagnostic engine
       }
     }
 

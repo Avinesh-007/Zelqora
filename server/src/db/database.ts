@@ -11,19 +11,41 @@ export function getDatabase(): Database.Database {
     return dbInstance;
   }
 
+  let dbPath = ENV.DATABASE_PATH;
+
   // Ensure directory exists if not memory
-  if (ENV.DATABASE_PATH !== ':memory:') {
-    const dir = path.dirname(ENV.DATABASE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+  if (dbPath !== ':memory:') {
+    try {
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    } catch (err: any) {
+      console.warn(`Could not create directory for DATABASE_PATH (${dbPath}): ${err.message}. Falling back to ./data/zelqora.db`);
+      dbPath = './data/zelqora.db';
+      try {
+        const fallbackDir = path.dirname(dbPath);
+        if (!fs.existsSync(fallbackDir)) {
+          fs.mkdirSync(fallbackDir, { recursive: true });
+        }
+      } catch {}
     }
   }
 
-  const db = new Database(ENV.DATABASE_PATH);
+  let db: Database.Database;
+  try {
+    db = new Database(dbPath);
+  } catch (err: any) {
+    console.warn(`Failed to open database at ${dbPath}: ${err.message}. Falling back to in-memory database.`);
+    db = new Database(':memory:');
+    dbPath = ':memory:';
+  }
 
-  // WAL mode for superior concurrency and performance
-  if (ENV.DATABASE_PATH !== ':memory:') {
-    db.pragma('journal_mode = WAL');
+  // WAL mode for superior concurrency and performance (file databases only)
+  if (dbPath !== ':memory:') {
+    try {
+      db.pragma('journal_mode = WAL');
+    } catch {}
   }
   db.pragma('foreign_keys = ON');
   db.pragma('busy_timeout = 5000');
